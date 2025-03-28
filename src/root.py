@@ -41,7 +41,6 @@ from .routes.items import route as items_route
 from .routes.categories import route as categories_route
 
 roots.include_router(auth_route,prefix="/auth")
-roots.include_router(items_route, prefix="/items")
 roots.include_router(categories_route, prefix="/categories")
-
+roots.include_router(items_route, prefix="/items")
 

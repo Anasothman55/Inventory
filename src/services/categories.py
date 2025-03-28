@@ -28,7 +28,10 @@ async def create_category_services(
     return result
   except IntegrityError as e:
     print(f"IntegrityError: {e}")
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bad Request")
+    raise HTTPException(
+      status_code=status.HTTP_409_CONFLICT,
+      detail="Categories already exists"
+    )
 
 async def get_one_category_services(repo: CategoryRepository, uid: uuid.UUID) -> CategoryModel:
   result = await repo.get_by_uid(uid)
