@@ -3,7 +3,7 @@ import uuid
 from typing import List
 from datetime import  datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from .items import ItemsBaseSchema
 
@@ -17,11 +17,23 @@ class OrderBy(enum.Enum):
   UPDATED_AT = "updated_at"
 
 class BaseCategoriesSchema(BaseModel):
-  name: str | None = None
+  name: str
+
+  model_config = ConfigDict(
+    extra='forbid',
+    str_strip_whitespace=True
+  )
+
 
 class CategoriesTime(BaseModel):
   created_at: datetime
   updated_at: datetime
+
+  model_config = ConfigDict(
+    extra='forbid',
+    str_strip_whitespace=True
+  )
+
 
 class CategoriesItemSchema(BaseCategoriesSchema,CategoriesTime):
   uid: uuid.UUID

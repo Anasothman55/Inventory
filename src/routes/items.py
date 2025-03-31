@@ -21,7 +21,7 @@ from ..services.items import (
   create_items_services,
   get_one_items_services,
   update_items_services,
-  delete_category_services,
+  delete_items_services,
 )
 
 route = APIRouter(
@@ -72,4 +72,4 @@ async def delete_items(
     uid: Annotated[uuid.UUID, Path()],
     repo: Annotated[ItemsRepository, Depends(get_items_repo)],
 ):
-  await delete_category_services(repo, uid)
+  await delete_items_services(repo, uid)

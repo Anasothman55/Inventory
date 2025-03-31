@@ -50,7 +50,7 @@ async def update_items_services(
   return result
 
 
-async def delete_category_services(repo: ItemsRepository, uid: uuid.UUID) -> None:
+async def delete_items_services(repo: ItemsRepository, uid: uuid.UUID) -> None:
   item = await get_one_items_services(repo,uid)
   await repo.delete_row(item)
   return None

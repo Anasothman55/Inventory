@@ -85,9 +85,9 @@ class PurchaseModel(SQLModel, table= True):
 
   purchasing_plase: str = Field(index=True, nullable=True)
   purchaser: str = Field(index=True, nullable=True, max_length=128)
-  beneficiary: str = Field(index=True, nullable=True, max_length= 128)
+  beneficiary: str = Field(index=True, nullable=False, max_length= 128)
   curuncy_type: str = Field(index=True, default='dinar')
-  total_price: Decimal = Field(sa_column=Column(DECIMAL(10, 2), default=0.0))
+  total_price: Decimal = Field(sa_column=Column(DECIMAL(10, 2), nullable=False))
   receipt_number: int = Field(index=True, nullable=True)
   recipient: str = Field(index=True, nullable=False)
   note: str = Field(index=True, nullable=True)

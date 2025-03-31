@@ -4,7 +4,7 @@ from typing import List
 from datetime import datetime
 
 
-from pydantic import  BaseModel
+from pydantic import  BaseModel, ConfigDict
 
 from .purchase_items import  BasePurchaseItemSchema
 
@@ -32,6 +32,11 @@ class CreateItemSchema(ItemsBaseSchema):
   description: str | None = None
   category_uid: uuid.UUID
 
+  model_config = ConfigDict(
+    extra='forbid',
+    str_strip_whitespace=True
+  )
+
 
 class UpdateItemSchema(ItemsBaseSchema):
   item_name : str | None = None
@@ -40,6 +45,11 @@ class UpdateItemSchema(ItemsBaseSchema):
   minimum_stock_level : int | None = None
   description: str | None = None
 
+  model_config = ConfigDict(
+    extra='forbid',
+    str_strip_whitespace=True
+  )
+
 
 class ItemFullSchema(ItemsBaseSchema):
   uid: uuid.UUID
@@ -47,6 +57,11 @@ class ItemFullSchema(ItemsBaseSchema):
   category_uid: uuid.UUID
   created_at: datetime
   updated_at: datetime
+
+  model_config = ConfigDict(
+    extra='forbid',
+    str_strip_whitespace=True
+  )
 
 
 class ItemsPurchaseSchema(ItemFullSchema):
