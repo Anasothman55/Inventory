@@ -10,7 +10,10 @@ from ..db.index import get_db
 from ..db.models import CategoryModel
 from ..utils.categories import CategoryRepository
 from ..schema.categories import BaseCategoriesSchema
-
+from ..exceptions.categories import (
+  CategoriesAlreadyExists,
+  CategoriesNotFound
+)
 
 
 
@@ -27,19 +30,12 @@ async def create_category_services(
     result = await repo.create_row(new_row)
     return result
   except IntegrityError as e:
-    print(f"IntegrityError: {e}")
-    raise HTTPException(
-      status_code=status.HTTP_409_CONFLICT,
-      detail="Categories already exists"
-    )
+    raise CategoriesAlreadyExists(req_data.name)
 
 async def get_one_category_services(repo: CategoryRepository, uid: uuid.UUID) -> CategoryModel:
   result = await repo.get_by_uid(uid)
   if not result:
-    raise HTTPException(
-      status_code=status.HTTP_404_NOT_FOUND,
-      detail="Category not found"
-    )
+    raise CategoriesNotFound(uid)
   return result
 
 
@@ -52,6 +48,6 @@ async def update_category_services(
 
 
 async def delete_category_services(repo: CategoryRepository, uid: uuid.UUID) -> None:
-  category = await repo.get_by_uid(uid)
+  category = await get_one_category_services(repo,uid)
   await repo.delete_row(category)
   return None

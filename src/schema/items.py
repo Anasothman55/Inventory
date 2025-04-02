@@ -27,6 +27,9 @@ class ItemsBaseSchema(BaseModel):
   unit : str
   minimum_stock_level : int | None = None
 
+class ItemsBasicSchema(BaseModel):
+  uid: uuid.UUID
+  item_name : str
 
 class CreateItemSchema(ItemsBaseSchema):
   description: str | None = None

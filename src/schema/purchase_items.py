@@ -1,7 +1,11 @@
+import uuid
+import enum
+from datetime import datetime
+from decimal import  Decimal
+
 
 from pydantic import BaseModel
 
-from decimal import  Decimal
 
 
 class BasePurchaseItemSchema(BaseModel):
@@ -10,6 +14,36 @@ class BasePurchaseItemSchema(BaseModel):
   subtotal_price : Decimal
   note: str
 
+class CreatePurchaseItemsSchema(BaseModel):
+  item_uid : str | None = None
+  new_name: str | None = None
+  unit : str | None = None
+  category_uid: str| None = None
+
+  quantity: int
+  unite_price: Decimal
+  note: str | None = None
 
 
+class GetFullPurchaseItemsSchema(BasePurchaseItemSchema):
+  uid: uuid.UUID
+  created_at: datetime
+  updated_at: datetime
 
+
+class GetAllPurchaseItemsSchema(GetFullPurchaseItemsSchema):
+  user_uid : uuid.UUID
+  item_uid : uuid.UUID
+  purchas_uid : uuid.UUID
+
+
+class Order(enum.Enum):
+  DESC  = "desc"
+  ASC  = "asc"
+
+class OrderBy(enum.Enum):
+  QUANTITY  = "quantity"
+  UNITE_PRICE = "unite_price"
+  SUBTOTAL_PRICE = "subtotal_price"
+  CREATED_AT = "created_at"
+  UPDATED_AT = "updated_at"

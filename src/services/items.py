@@ -8,7 +8,7 @@ from fastapi import HTTPException, status
 from ..db.models import ItemsModel
 from ..utils.items import ItemsRepository
 from ..schema.items import CreateItemSchema, UpdateItemSchema
-
+from ..exceptions.Items import ItemsAlreadyExists, ItemsNotFound
 
 async def create_items_services(
     user_uid:uuid.UUID,
@@ -22,20 +22,13 @@ async def create_items_services(
     result = await repo.create_row(new_row)
     return result
   except IntegrityError as e:
-    print(f"IntegrityError: {e}")
-    raise HTTPException(
-      status_code=status.HTTP_409_CONFLICT,
-      detail="Item already exists"
-    )
+    raise ItemsAlreadyExists(req_data.item_name)
 
 
 async def get_one_items_services(repo: ItemsRepository, uid: uuid.UUID) -> ItemsModel:
   result = await repo.get_by_uid(uid)
   if not result:
-    raise HTTPException(
-      status_code=status.HTTP_404_NOT_FOUND,
-      detail="Items not found"
-    )
+    raise ItemsNotFound(uid)
   return result
 
 

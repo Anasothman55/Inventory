@@ -2,11 +2,14 @@ from fastapi import Depends
 
 from ..db.index import get_db
 from ..db.models import PurchaseModel
-from ..schema.categories import Order, OrderBy
+from ..schema.purchase import Order, OrderBy,CreatePurchaseSchema
+from ..exceptions.purchase import PurchaseAlreadyExists
 
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select,desc, asc
+
+from datetime import date
 from typing import Any, Annotated
 import uuid
 
@@ -32,7 +35,7 @@ class PurchasesRepository:
   async def get_by_uid(self, uid: uuid.UUID):
     return await self._statement(field="uid", value=uid)
 
-  async def get_by_purchasing_plase(self, name: str):
+  async def get_by_purchasing_plase(self, name: str) -> PurchaseModel:
     return await self._statement(field="purchasing_plase", value=name)
 
   async def get_by_purchaser(self, unit: str):
@@ -41,8 +44,8 @@ class PurchasesRepository:
   async def get_by_curuncy_type(self, uid: uuid.UUID):
     return await self._statement(field="curuncy_type", value= uid)
 
-  async def get_by_receipt_number(self, uid: uuid.UUID):
-    return await self._statement(field="receipt_number", value= uid)
+  async def get_by_receipt_number(self, rn: int):
+    return await self._statement(field="receipt_number", value= rn)
 
   async def get_by_recipient(self, uid: uuid.UUID):
     return await self._statement(field="recipient", value= uid)
@@ -74,7 +77,11 @@ async def get_purchases_repo(db: Annotated[AsyncSession, Depends(get_db)]):
 
 
 
-
+async def check_purchase_unique(
+    repo: PurchasesRepository, purchasing_plase: str ,receipt_number: int ):
+  existing_purchase  = await repo.get_by_purchasing_plase(purchasing_plase)
+  if existing_purchase and existing_purchase.receipt_number == receipt_number:
+    raise PurchaseAlreadyExists(existing_purchase.purchasing_plase, existing_purchase.receipt_number)
 
 
 

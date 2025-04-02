@@ -13,6 +13,7 @@ from pydantic import EmailStr,ValidationError
 from ..db.models import UserModel
 from ..core.config import setting
 from ..schema.auth import CreateIUserDict, CreateUser, UserLogin
+from ..exceptions.auth import PydanticException, AuthenticateEx, InvalidPasswordError,JWTEx
 
 #? hash and verify password
 pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -86,17 +87,11 @@ async def create_token(token_dict: dict ,response: Response):
 #? decode jwt token
 def jwt_decode(token: str, options: dict | None = None):
   try:
-    if options:
-      payload = jwt.decode(token, setting.SECRET_KEY,algorithms= setting.ALGORITHM, options=options)
-    else:
-      payload = jwt.decode(token, setting.SECRET_KEY, algorithms=setting.ALGORITHM)
+    payload = jwt.decode( token, setting.SECRET_KEY, algorithms=setting.ALGORITHM, options=options if options else {},)
     return payload
-  except ExpiredSignatureError as e:
-    raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail=str(e))
-  except JWTError as e:
-    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-  except Exception as e:
-    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+  except (ExpiredSignatureError,JWTError) as e:
+    raise JWTEx(detail=str(e))
+
 
 
 #! register utils
@@ -124,10 +119,7 @@ async def validate_user_data(db: AsyncSession,user: CreateIUserDict) -> CreateUs
     errors.extend(unique_errors)
 
   if errors:
-    raise HTTPException(
-      status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-      detail=errors
-    )
+    raise PydanticException(errors)
 
   return result
 
@@ -138,24 +130,10 @@ async def authenticate_user(repo: UserRepositoryUtils,form_data: UserLogin ) -> 
   user = await repo.get_by_email(form_data.email)
 
   if not user:
-    raise HTTPException(
-      status_code=status.HTTP_404_NOT_FOUND,
-      detail= {
-        "error": "User not found",
-        "hint": "Please check the email address",
-        "loc":"email"
-      }
-    )
+    raise AuthenticateEx
   
   if form_data.password != user.password:
     if not verify_password_utils(form_data.password, user.password):
-      raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail={
-          "error": "Invalid password",
-          "hint": "Please check your password",
-          "loc":"password"
-        }
-      )
+      raise InvalidPasswordError
   
   return user

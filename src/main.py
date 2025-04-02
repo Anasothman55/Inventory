@@ -1,13 +1,15 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 
 from contextlib import  asynccontextmanager
 
 from .root import roots
 from .db.index import init_db, close_db_connection, get_db
-from fastapi.middleware.cors import CORSMiddleware
+from .logging import configure_logging, LogLevels
 
 
-
+configure_logging(LogLevels.info)
 
 @asynccontextmanager
 async def life_span(app: FastAPI):

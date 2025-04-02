@@ -8,6 +8,9 @@ from pydantic import  BaseModel,ConfigDict, Field
 
 from .purchase_items import  BasePurchaseItemSchema
 
+class Curuncy(enum.Enum):
+  USD  = "USD"
+  dinar = "dinar"
 
 
 class Order(enum.Enum):
@@ -50,7 +53,7 @@ class CreatePurchaseSchema(BaseModel):
   purchasing_plase : str = Field(...)
   purchaser : str | None  = None
   beneficiary : str = Field(...)
-  curuncy_type: str = Field(...)
+  curuncy_type: Curuncy = Field(...)
   total_price: Decimal = Field(...)
   receipt_number : int | None = None
   recipient: str = Field(...)

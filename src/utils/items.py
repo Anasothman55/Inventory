@@ -66,6 +66,7 @@ class ItemsRepository:
         setattr(row_model,key,value)
     return await self._commit_refresh(row_model)
 
+
 async def get_items_repo(db: Annotated[AsyncSession, Depends(get_db)]):
   return ItemsRepository(db)
 

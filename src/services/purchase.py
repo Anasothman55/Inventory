@@ -6,36 +6,31 @@ from fastapi import HTTPException, status
 
 
 from ..db.models import  PurchaseModel
-from ..utils.purchase import PurchasesRepository
+from ..utils.purchase import PurchasesRepository, check_purchase_unique
 from ..schema.purchase import CreatePurchaseSchema, UpdatePurchaseSchema
+from ..exceptions.purchase import PurchaseAlreadyExists, PurchaseNotFound
+
 
 
 async def create_purchase_services(
     user_uid:uuid.UUID,
     repo: PurchasesRepository,
     req_data:CreatePurchaseSchema) -> PurchaseModel:
-  try:
-    new_data = req_data.model_dump()
-    new_data.update({"user_uid": user_uid})
+  await check_purchase_unique(req_data.purchasing_plase, req_data.receipt_number)
 
-    new_row = PurchaseModel(**new_data )
-    result = await repo.create_row(new_row)
-    return result
-  except IntegrityError as e:
-    print(f"IntegrityError: {e}")
-    raise HTTPException(
-      status_code=status.HTTP_409_CONFLICT,
-      detail="Purchase already exists"
-    )
+  curuncy_type = req_data.curuncy_type.value
+  new_data = req_data.model_dump(exclude={'curuncy_type'})
+  new_data.update({"user_uid": user_uid, 'curuncy_type':curuncy_type})
+
+  new_row = PurchaseModel(**new_data )
+  result = await repo.create_row(new_row)
+  return result
 
 
 async def get_one_purchase_services(repo: PurchasesRepository, uid: uuid.UUID) -> PurchaseModel:
   result = await repo.get_by_uid(uid)
   if not result:
-    raise HTTPException(
-      status_code=status.HTTP_404_NOT_FOUND,
-      detail="Items not found"
-    )
+    raise PurchaseNotFound(uid)
   return result
 
 

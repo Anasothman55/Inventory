@@ -40,10 +40,11 @@ from .routes.auth import route as auth_route
 from .routes.items import route as items_route
 from .routes.categories import route as categories_route
 from .routes.purchase import route as purchase_route
+from .routes.purchase_items import route as purchase_items_route
 
 
 roots.include_router(auth_route,prefix="/auth")
 roots.include_router(categories_route, prefix="/categories")
 roots.include_router(items_route, prefix="/items")
 roots.include_router(purchase_route, prefix="/purchases")
-
+roots.include_router(purchase_items_route, prefix="/purchase-items")

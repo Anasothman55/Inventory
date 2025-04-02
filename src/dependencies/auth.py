@@ -1,6 +1,7 @@
 from ..db.models import UserModel
 from ..utils.auth import UserRepositoryUtils, jwt_decode
 from ..db.index import get_db
+from ..exceptions.auth import UserNotFoundError
 
 from fastapi import Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,5 +31,5 @@ async def get_current_user(
   userId = uuid.UUID(payload.get('sub'))
   
   if not (user_data := await user_repo.get_by_uid(userId)):
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    raise UserNotFoundError(userId)
   return user_data

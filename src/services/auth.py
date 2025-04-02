@@ -54,12 +54,7 @@ async def login_crud(db: AsyncSession,form_data: UserLogin, response: Response):
 
 
 async def check_auth_services(current_user: Annotated[UserModel, Depends(get_current_user)] )-> UserModel:
-  try:
-    return  current_user
-  except Exception as e:
-    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
-
+  return current_user
 
 
 
