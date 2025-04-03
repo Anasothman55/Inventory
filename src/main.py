@@ -7,9 +7,9 @@ from contextlib import  asynccontextmanager
 from .root import roots
 from .db.index import init_db, close_db_connection, get_db
 from .logging import configure_logging, LogLevels
+from .middleware import CatchAllExceptionsMiddleware
 
-
-configure_logging(LogLevels.info)
+configure_logging(LogLevels.debug)
 
 @asynccontextmanager
 async def life_span(app: FastAPI):
@@ -40,6 +40,9 @@ app.add_middleware(
   allow_methods=["*"],  # Allow all HTTP methods
   allow_headers=["*"],  # Allow all headers
 )
+
+
+app.add_middleware(CatchAllExceptionsMiddleware)
 
 app.include_router(roots)
 

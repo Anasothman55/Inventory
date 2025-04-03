@@ -25,6 +25,13 @@ class CreatePurchaseItemsSchema(BaseModel):
   note: str | None = None
 
 
+class UpdatePurchaseItemsSchema(BaseModel):
+  quantity: int | None = None
+  unite_price: Decimal | None = None
+  note: str | None = None
+
+
+
 class GetFullPurchaseItemsSchema(BasePurchaseItemSchema):
   uid: uuid.UUID
   created_at: datetime

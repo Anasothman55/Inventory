@@ -32,6 +32,7 @@ class PurchasesItemsRepository:
     await self.db.delete(row)
     await self.db.commit()
 
+
   async def get_by_uid(self, uid: uuid.UUID):
     return await self._statement(field="uid", value=uid)
 
@@ -73,8 +74,8 @@ async def create_new_row_utils(
     data: dict, create_row: Callable, update_row: Callable, items: ItemsModel):
   new_row = PurchaseItemsModel(**data)
   new_data = await create_row(new_row)
-
-  item_update_dict = {"stock": new_data.quantity}
+  new_stock = new_data.quantity + items.stock
+  item_update_dict = {"stock": new_stock}
   await update_row(item_update_dict, items)
 
   return new_data

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from .db.index import get_db
+from .rate_limiter import limiter
 
 from rich import print
 
@@ -30,8 +31,11 @@ async def helth(db: Annotated[AsyncSession, Depends(get_db)]):
     )
 
 
+
 @roots.get("/")
+@limiter.limit("10/minute", error_message="you rich your limit")
 async def root_route(request: Request):
+  dkjsbd
   return {"message": "Welcome to FastAPI Project"}
 
 
