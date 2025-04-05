@@ -12,6 +12,8 @@ from rich import print
 roots = APIRouter()
 
 
+
+
 @roots.get("/helth", status_code=status.HTTP_200_OK)
 async def helth(db: Annotated[AsyncSession, Depends(get_db)]):
   try:
@@ -35,11 +37,10 @@ async def helth(db: Annotated[AsyncSession, Depends(get_db)]):
 @roots.get("/")
 @limiter.limit("10/minute", error_message="you rich your limit")
 async def root_route(request: Request):
-  dkjsbd
   return {"message": "Welcome to FastAPI Project"}
 
 
-
+from .routes.admin import route as admin_route
 from .routes.auth import route as auth_route
 from .routes.items import route as items_route
 from .routes.categories import route as categories_route
@@ -47,6 +48,7 @@ from .routes.purchase import route as purchase_route
 from .routes.purchase_items import route as purchase_items_route
 
 
+roots.include_router(admin_route,prefix='/0a6c5da9793b254a/d658ddbfe93013bf/admin')
 roots.include_router(auth_route,prefix="/auth")
 roots.include_router(categories_route, prefix="/categories")
 roots.include_router(items_route, prefix="/items")

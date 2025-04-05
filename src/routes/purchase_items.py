@@ -11,6 +11,7 @@ from ..services.purchase_items import (
   update_purchase_items_services,
   delete_purchase_items_services,
 )
+from ..schema.auth import  RoleBase
 from ..schema.purchase_items import (
   BasePurchaseItemSchema,
   CreatePurchaseItemsSchema,
@@ -20,14 +21,20 @@ from ..schema.purchase_items import (
   Order, UpdatePurchaseItemsSchema,
 )
 from ..db.models import UserModel
-from ..dependencies.auth import get_current_user
+from ..dependencies.auth import get_current_user, require_roles
 from ..utils.purchase import PurchasesRepository, get_purchases_repo
 from ..utils.purchase_items import PurchasesItemsRepository, get_purchases_items_repo
 from ..utils.items import ItemsRepository, get_items_repo
 
 
+
+alter_role = [RoleBase.ADMIN, RoleBase.ACCOUNTANT]
+see_role = [RoleBase.ADMIN, RoleBase.ACCOUNTANT, RoleBase.MANAGER]
+
+
+
 route = APIRouter(
-  dependencies= [Depends(get_current_user)],
+  dependencies= [Depends(require_roles(see_role))],
   tags=["Purchases Items"]
 )
 
@@ -48,7 +55,7 @@ async def create_purchase_items(
     req_data: Annotated[CreatePurchaseItemsSchema , Form()],
     repo: Annotated[PurchasesItemsRepository , Depends(get_purchases_items_repo)],
     items_repo: Annotated[ItemsRepository , Depends(get_items_repo)],
-    current_user: Annotated[UserModel , Depends(get_current_user)]
+    current_user: Annotated[UserModel , Depends(require_roles(alter_role))]
 ):
   res = await create_purchase_items_service(repo, items_repo, req_data, current_user.uid, purchase_uid)
   return res
@@ -66,13 +73,14 @@ async def update_purchase_items(
     new_data: Annotated[UpdatePurchaseItemsSchema , Form()],
     repo: Annotated[PurchasesItemsRepository , Depends(get_purchases_items_repo)],
     items_repo: Annotated[ItemsRepository , Depends(get_items_repo)],
-    current_user: Annotated[UserModel , Depends(get_current_user)]
+    current_user: Annotated[UserModel , Depends(require_roles(alter_role))]
 ):
   res = await update_purchase_items_services(repo,items_repo, uid, current_user.uid,new_data)
   return res
 
 @route.delete("/{uid}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_purchase_items(
+    current_user: Annotated[UserModel , Depends(require_roles(alter_role))],
     uid: Annotated[uuid.UUID, Path()],
     repo: Annotated[PurchasesItemsRepository , Depends(get_purchases_items_repo)],
     items_repo: Annotated[ItemsRepository , Depends(get_items_repo)],

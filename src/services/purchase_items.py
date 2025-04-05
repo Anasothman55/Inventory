@@ -76,9 +76,10 @@ async def update_purchase_items_services(
   dumped.update({"user_uid": user_uid, "subtotal_price": subtotal_price})
   res = await repo.update_row(dumped, pt)
 
-  items = await get_one_items_services(items_repo, pt.item_uid)
-  new_stock = items.stock + (res.quantity - old_qty)
-  await items_repo.update_row({"stock": new_stock}, items)
+  if pt.item_uid is not None:
+    items = await get_one_items_services(items_repo, pt.item_uid)
+    new_stock = items.stock + (res.quantity - old_qty)
+    await items_repo.update_row({"stock": new_stock}, items)
 
   return res
 
@@ -89,9 +90,10 @@ async def delete_purchase_items_services(
   pt = await get_one_purchase_items_services(repo,uid)
   qty = pt.quantity
 
-  items = await get_one_items_services(item_repo, pt.item_uid)
-  new_stock = items.stock - qty
-  await item_repo.update_row({"stock": new_stock}, items)
+  if pt.item_uid is not None:
+    items = await get_one_items_services(item_repo, pt.item_uid)
+    new_stock = items.stock - qty
+    await item_repo.update_row({"stock": new_stock}, items)
 
   await repo.delete_row(pt)
   return None

@@ -1,18 +1,23 @@
-
+from numpy.ma.core import true_divide
 from sqlalchemy import Column, TIMESTAMP, DateTime,Date, false
 from sqlmodel import  SQLModel,Field, Relationship,DECIMAL, Date
 from sqlalchemy.sql import func
 import sqlalchemy.dialects.postgresql as pg
 
 import uuid
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date,time
 from typing import List, Optional
 from decimal import Decimal
 
 
-def get_current_time():
+
+def get_current_time() -> datetime:
   return datetime.now(timezone.utc)
 
+def get_date() -> date:
+  return get_current_time().date()
+def get_time()-> time:
+  return get_current_time().time()
 
 class UserModel(SQLModel, table= True):
   __tablename__ = "users"
@@ -41,7 +46,7 @@ class CategoryModel(SQLModel, table = True):
 
   name: str = Field(index=True, unique= True)
 
-  user_uid: uuid.UUID = Field( foreign_key="users.uid")
+  user_uid: Optional[uuid.UUID] = Field( foreign_key="users.uid")
 
   items_model: List["ItemsModel"] = Relationship(back_populates="category_model",sa_relationship_kwargs={"lazy": "selectin"})
 
@@ -65,11 +70,13 @@ class ItemsModel(SQLModel , table= True):
   minimum_stock_level: int = Field(index=True , default=0, ge=0)
   description : str = Field(index=True, default="")
   
-  user_uid: uuid.UUID = Field( foreign_key="users.uid")
+  user_uid: Optional[uuid.UUID] = Field( foreign_key="users.uid")
   category_uid: Optional[uuid.UUID] = Field(default=None, foreign_key="categories.uid")
   
   purchas_items_model: List["PurchaseItemsModel"] = Relationship(back_populates="items_model",sa_relationship_kwargs={"lazy": "selectin"})
   category_model: Optional[CategoryModel] = Relationship(back_populates="items_model", sa_relationship_kwargs={"lazy": "selectin"})
+  item_transaction_model : Optional["ItemTransactions"] = Relationship(back_populates="items_model", sa_relationship_kwargs={"lazy": "selectin"})
+
 
   created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
   updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
@@ -83,6 +90,7 @@ class PurchaseModel(SQLModel, table= True):
 
   uid: uuid.UUID = Field(sa_column=Column(pg.UUID(as_uuid=True), primary_key=True,index=True, unique=True, default=uuid.uuid4))
 
+  category: str = Field(index=True, nullable=True)
   purchasing_plase: str = Field(index=True, nullable=True)
   purchaser: str = Field(index=True, nullable=True, max_length=128)
   beneficiary: str = Field(index=True, nullable=False, max_length= 128)
@@ -92,9 +100,11 @@ class PurchaseModel(SQLModel, table= True):
   recipient: str = Field(index=True, nullable=False)
   note: str = Field(index=True, nullable=True)
   purchase_date: date = Field(sa_column=Column(Date, nullable=True))  # Corrected
-  user_uid: uuid.UUID = Field( foreign_key="users.uid")
+
+  user_uid: Optional[uuid.UUID] = Field( foreign_key="users.uid")
   
   purchas_items_model: List["PurchaseItemsModel"] = Relationship(back_populates="purchas_model",sa_relationship_kwargs={"lazy": "selectin"})
+
 
   created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
   updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
@@ -115,9 +125,9 @@ class PurchaseItemsModel(SQLModel, table= True):
   subtotal_price : Decimal = Field(sa_column=Column(DECIMAL(11, 2), default=0.0))
   note: str = Field(index=True, nullable=True)
   
-  user_uid: uuid.UUID = Field( foreign_key="users.uid")
-  item_uid: uuid.UUID = Field(foreign_key="items.uid")
-  purchas_uid: uuid.UUID = Field(foreign_key="purchase.uid")
+  user_uid: Optional[uuid.UUID]  = Field( foreign_key="users.uid")
+  item_uid: Optional[uuid.UUID]  = Field(foreign_key="items.uid")
+  purchas_uid: Optional[uuid.UUID] = Field(foreign_key="purchase.uid")
   
   purchas_model: Optional[PurchaseModel] = Relationship(back_populates="purchas_items_model", sa_relationship_kwargs={"lazy": "selectin"})
   items_model: Optional[ItemsModel] = Relationship(back_populates="purchas_items_model", sa_relationship_kwargs={"lazy": "selectin"})
@@ -127,3 +137,58 @@ class PurchaseItemsModel(SQLModel, table= True):
 
 def __repr__(self):
     return f"<Book {self.uid}>"
+
+
+class EmployeeModel(SQLModel, table = True):
+  __tablename__ = "employees"
+  uid: uuid.UUID = Field(sa_column=Column(pg.UUID(as_uuid=True), primary_key=True,index=True, unique=True, default=uuid.uuid4))
+  name: str = Field(index=True, nullable=False, unique=True)
+
+  user_uid: Optional[uuid.UUID]  = Field( foreign_key="users.uid")
+
+  employee_info_model: Optional["EmployeeInfoModel"] = Relationship(back_populates="employee_model", sa_relationship_kwargs={"lazy": "selectin"})
+  item_transaction_model : Optional["ItemTransactions"] = Relationship(back_populates="employee_model", sa_relationship_kwargs={"lazy": "selectin"})
+
+  created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
+  updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
+
+class EmployeeInfoModel(SQLModel, table= True):
+  __tablename__ = "employee_info"
+  uid: uuid.UUID = Field(sa_column=Column(pg.UUID(as_uuid=True), primary_key=True,index=True, unique=True, default=uuid.uuid4))
+  email: str = Field(unique=True)
+  phone_number: str = Field(unique=True, index=True)
+
+  employee_uid: uuid.UUID  = Field(foreign_key="employees.uid", ondelete='CASCADE')
+  user_uid: Optional[uuid.UUID]  = Field( foreign_key="users.uid")
+
+  employee_model: Optional[EmployeeModel] = Relationship(back_populates="employee_info_model", sa_relationship_kwargs={"lazy": "selectin"})
+
+  created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
+  updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
+
+
+
+class ItemTransactions(SQLModel, table=True):
+  __tablename__ = "item_transactions"
+  uid: uuid.UUID = Field(sa_column=Column(pg.UUID(as_uuid=True), primary_key=True,index=True, unique=True, default=uuid.uuid4))
+  quantity: int = Field(gt=0, nullable=False)
+  action_type: str = Field(nullable=False, index=True)
+  transaction_date: date = Field(default_factory=get_date, index=True)
+  transaction_time: time = Field(default_factory=get_time, index=True)
+  note: str = Field(nullable=True)
+
+  employee_uid: Optional[uuid.UUID]  = Field(foreign_key="employees.uid", ondelete='SET NULL')
+  user_uid: Optional[uuid.UUID]  = Field( foreign_key="users.uid", ondelete='SET NULL')
+  item_uid: Optional[uuid.UUID]  = Field(foreign_key="items.uid", ondelete='SET NULL')
+
+  employee_model: Optional[EmployeeModel] = Relationship(back_populates="item_transaction_model", sa_relationship_kwargs={"lazy": "selectin"})
+  items_model: Optional[ItemsModel] = Relationship(back_populates="item_transaction_model", sa_relationship_kwargs={"lazy": "selectin"})
+
+  created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
+  updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
+
+
+
+
+
+

@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 
 
 from passlib.context import CryptContext
-from fastapi import HTTPException, Response, status
+from fastapi import  Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError, ExpiredSignatureError 
@@ -39,23 +39,23 @@ class UserRepositoryUtils:
     self.db = db
     self.model = UserModel
   async def _statement(self,  field: str, value: Any):
-    statement = (
-      select(self.model).where(getattr(self.model, field) == value)
-    )
-    
-    result = await self.db.execute(statement)
-    user =  result.scalars().first()
-    return user
-  async def get_by_email(self, email: EmailStr) -> UserModel:
-    return await self._statement("email", email)
-  
-  async def get_by_username(self, username: str) -> UserModel:
-    return await self._statement("username", username)
-  
-  async def get_by_uid(self, uid: uuid.UUID) -> UserModel:
-    return await self._statement("uid", uid)
+    statement = ( select(self.model).where(getattr(self.model, field) == value))
+    return await self.db.execute(statement)
 
-  async def create(self, **kwargs):
+  async def get_by_email(self, email: EmailStr) -> UserModel:
+    res =  await self._statement("email", email)
+    return res.scalars().first()
+  async def get_by_username(self, username: str) -> UserModel:
+    res = await self._statement("username", username)
+    return res.scalars().first()
+  async def get_by_uid(self, uid: uuid.UUID) -> UserModel:
+    res = await self._statement("uid", uid)
+    return res.scalars().first()
+  async def get_by_role(self, role: str) -> UserModel:
+    res =  await self._statement("role", role)
+    return res.scalar_one_or_none()
+
+  async def create(self, kwargs):
     new_user = self.model(**kwargs)
     self.db.add(new_user)
     await self.db.commit()

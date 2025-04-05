@@ -3,8 +3,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from ..core.config import setting
 from sqlalchemy.orm import sessionmaker
 from typing import AsyncGenerator
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel,text
+from ..utils.auth import UserRepositoryUtils, UserModel, hash_password_utils
 
+from rich import print
 
 engine = create_async_engine(
   url= setting.POSTGRESQL_URI,
@@ -45,7 +47,22 @@ async def init_db():
     await conn.run_sync(SQLModel.metadata.create_all)
     print("Database tables created successfully")
 
+  async with async_session_maker() as db:
+    # Check if an admin user already exists
+    user_repo = UserRepositoryUtils(db)
+    result = await user_repo.get_by_role('admin')
 
+    if not result:
+      dumped = {
+        'username': 'Admin',
+        'email': 'anasothman581@gmail.com',
+        'password': hash_password_utils('anasadmin'),
+        'role': 'admin'
+      }
 
+      res = await user_repo.create(dumped)
+      print(res)
+    else:
+      print("Admin user already exists")
 
 

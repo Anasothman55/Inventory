@@ -5,6 +5,7 @@ from fastapi import APIRouter,  Query, status, HTTPException, Form, Depends, Pat
 
 import uuid
 
+from ..schema.auth import RoleBase
 from ..schema.purchase import (
   BasePurchaseSchema,
   CreatePurchaseSchema,
@@ -15,7 +16,7 @@ from ..schema.purchase import (
   Order,
 )
 from ..db.models import UserModel
-from ..dependencies.auth import get_current_user
+from ..dependencies.auth import get_current_user, require_roles
 from ..utils.purchase import PurchasesRepository, get_purchases_repo
 from ..services.purchase import (
   get_one_purchase_services,
@@ -24,8 +25,13 @@ from ..services.purchase import (
   delete_purchase_services
 )
 
+
+alter_role = [RoleBase.ADMIN, RoleBase.ACCOUNTANT]
+see_role = [RoleBase.ADMIN, RoleBase.ACCOUNTANT, RoleBase.MANAGER]
+
+
 route = APIRouter(
-  dependencies= [Depends(get_current_user)],
+  dependencies= [Depends(require_roles(see_role))],
   tags=["Purchases"]
 )
 
@@ -43,7 +49,7 @@ async def get_all_items(
 @route.post("/", status_code=status.HTTP_201_CREATED, response_model=GetFullPurchaseSchema)
 async def create_items(
     req_data: Annotated[CreatePurchaseSchema, Form()],
-    current_user: Annotated[UserModel, Depends(get_current_user)],
+    current_user: Annotated[UserModel, Depends(require_roles(alter_role))],
     repo: Annotated[PurchasesRepository, Depends(get_purchases_repo)],
 ):
   res = await create_purchase_services(current_user.uid, repo, req_data)
@@ -59,6 +65,7 @@ async def get_one_items(
 
 @route.patch("/{uid}", status_code=status.HTTP_200_OK, response_model=BasePurchaseSchema)
 async def update_items(
+    current_user: Annotated[UserModel, Depends(require_roles(alter_role))],
     uid: Annotated[uuid.UUID, Path()],
     new_data: Annotated[UpdatePurchaseSchema, Form()],
     repo: Annotated[PurchasesRepository, Depends(get_purchases_repo)],
@@ -68,6 +75,7 @@ async def update_items(
 
 @route.delete("/{uid}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_items(
+    current_user: Annotated[UserModel, Depends(require_roles([RoleBase.ADMIN]))],
     uid: Annotated[uuid.UUID, Path()],
     repo: Annotated[PurchasesRepository, Depends(get_purchases_repo)],
 ):

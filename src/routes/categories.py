@@ -7,7 +7,8 @@ import uuid
 
 from ..utils.categories import CategoryRepository,get_category_repo
 from ..db.models import UserModel
-from ..dependencies.auth import get_current_user
+from ..dependencies.auth import get_current_user,require_roles
+from ..schema.auth import RoleBase
 from ..schema.categories import  Order, CategoriesItemSchema,BaseCategoriesSchema,OrderBy
 from ..services.categories import (
   create_category_services,
@@ -17,7 +18,7 @@ from ..services.categories import (
 )
 
 
-
+alter_role = [RoleBase.ADMIN, RoleBase.STOCK_KIPPER]
 
 
 route = APIRouter(
@@ -39,7 +40,7 @@ async def get_all_categories(
 @route.post("/", status_code=status.HTTP_201_CREATED)
 async def create_category(
     req_data: Annotated[BaseCategoriesSchema, Form()],
-    current_user: Annotated[UserModel, Depends(get_current_user)],
+    current_user: Annotated[UserModel, Depends(require_roles(alter_role))],
     repo: Annotated[CategoryRepository, Depends(get_category_repo)],
 ):
   result = await create_category_services(current_user.uid,repo,req_data)
@@ -57,6 +58,7 @@ async def get_one_categories(
 
 @route.patch("/{uid}", status_code=status.HTTP_200_OK)
 async def update_category(
+    current_user: Annotated[UserModel, Depends(require_roles([RoleBase.ADMIN]))],
     uid: Annotated[uuid.UUID,Path(...)],
     new_data: Annotated[BaseCategoriesSchema, Form()],
     repo: Annotated[CategoryRepository, Depends(get_category_repo)],
@@ -66,6 +68,7 @@ async def update_category(
 
 @route.delete("/{uid}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_category(
+    current_user: Annotated[UserModel, Depends(require_roles([RoleBase.ADMIN]))],
     uid: Annotated[uuid.UUID, Path(...)],
     repo: Annotated[CategoryRepository, Depends(get_category_repo)],
 ):

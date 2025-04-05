@@ -24,14 +24,13 @@ from ..utils.auth import (
 #? user sign up function
 
 async def register_crud(db: AsyncSession, user_model: CreateIUserDict,user_repo: UserRepositoryUtils) -> dict:
-
   user = await validate_user_data(db,user_model)
 
   hashing = hash_password_utils(user.password)
   user_data = user.model_dump()
   user_data['password'] = hashing
 
-  user = await user_repo.create(**user_data)
+  user = await user_repo.create(user_data)
   return user
 
 

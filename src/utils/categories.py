@@ -6,7 +6,7 @@ from ..schema.categories import Order, OrderBy
 
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select,desc, asc,and_
+from sqlmodel import select,desc, asc
 from typing import Any, Annotated
 import uuid
 

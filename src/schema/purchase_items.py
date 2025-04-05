@@ -33,15 +33,15 @@ class UpdatePurchaseItemsSchema(BaseModel):
 
 
 class GetFullPurchaseItemsSchema(BasePurchaseItemSchema):
-  uid: uuid.UUID
+  uid: uuid.UUID | None = None
   created_at: datetime
   updated_at: datetime
 
 
 class GetAllPurchaseItemsSchema(GetFullPurchaseItemsSchema):
-  user_uid : uuid.UUID
-  item_uid : uuid.UUID
-  purchas_uid : uuid.UUID
+  user_uid : uuid.UUID  | None = None
+  item_uid : uuid.UUID | None = None
+  purchas_uid : uuid.UUID | None = None
 
 
 class Order(enum.Enum):

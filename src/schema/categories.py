@@ -36,7 +36,7 @@ class CategoriesTime(BaseModel):
 
 
 class CategoriesItemSchema(BaseCategoriesSchema,CategoriesTime):
-  uid: uuid.UUID
+  uid: uuid.UUID | None = None
   user_uid: uuid.UUID
 
   items_model: List[ItemsBaseSchema] = []

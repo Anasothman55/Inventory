@@ -69,8 +69,8 @@ class UpdatePurchaseSchema(BasePurchaseSchema2):
   pass
 
 class GetFullPurchaseSchema(BasePurchaseSchema2):
-  uid : uuid.UUID
-  user_uid : uuid.UUID
+  uid : uuid.UUID  | None = None
+  user_uid : uuid.UUID  | None = None
   created_at: datetime
   updated_at: datetime
 

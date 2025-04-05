@@ -37,6 +37,16 @@ class InvalidPasswordError(UserError):
     )
 
 
+class AuthorizationError(UserError):
+  def __init__(self):
+    super().__init__(
+      status_code=status.HTTP_403_FORBIDDEN,
+      detail={
+        "error": "Access denied"
+      }
+    )
+
+
 
 class JWTEx(HTTPException):
   def __init__(self, detail="JWT authentication error", status_code=status.HTTP_403_FORBIDDEN):

@@ -4,17 +4,17 @@ from operator import le
 from fastapi import Form
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, StrictStr,field_validator
 import uuid
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import List,Optional
 
 
 
-class RoleBase(str, Enum):
-  user = "user"
-  admin = "admin"
-  accountant = "accountant"
-  stock_kipper = "stock_kipper"
-
+class RoleBase(StrEnum):
+  USER = "user"
+  ADMIN = "admin"
+  ACCOUNTANT = "accountant"
+  STOCK_KIPPER = "stock_kipper"
+  MANAGER = "manager"
 
 
 class UserBase(BaseModel):
@@ -25,7 +25,7 @@ class UserBase(BaseModel):
 
 
 class GetFullUser(UserBase):
-  uid: uuid.UUID
+  uid: uuid.UUID | None = None
   role: str
   is_active: bool
   last_login_date: datetime | None = None

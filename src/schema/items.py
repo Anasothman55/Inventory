@@ -28,12 +28,12 @@ class ItemsBaseSchema(BaseModel):
   minimum_stock_level : int | None = None
 
 class ItemsBasicSchema(BaseModel):
-  uid: uuid.UUID
+  uid: uuid.UUID | None = None
   item_name : str
 
 class CreateItemSchema(ItemsBaseSchema):
   description: str | None = None
-  category_uid: uuid.UUID
+  category_uid: uuid.UUID  | None = None
 
   model_config = ConfigDict(
     extra='forbid',
