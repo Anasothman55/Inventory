@@ -46,11 +46,12 @@ from .routes.items import route as items_route
 from .routes.categories import route as categories_route
 from .routes.purchase import route as purchase_route
 from .routes.purchase_items import route as purchase_items_route
-
+from .routes.employee import route as employee_route
 
 roots.include_router(admin_route,prefix='/0a6c5da9793b254a/d658ddbfe93013bf/admin')
 roots.include_router(auth_route,prefix="/auth")
 roots.include_router(categories_route, prefix="/categories")
 roots.include_router(items_route, prefix="/items")
+roots.include_router(employee_route, prefix="/employees")
 roots.include_router(purchase_route, prefix="/purchases")
 roots.include_router(purchase_items_route, prefix="/purchase-items")

@@ -5,14 +5,15 @@ from datetime import datetime, timezone, timedelta
 
 from passlib.context import CryptContext
 from fastapi import  Response
-from sqlalchemy import select
+from sqlalchemy import select, Select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import desc, asc
 from jose import jwt, JWTError, ExpiredSignatureError 
 from pydantic import EmailStr,ValidationError
 
 from ..db.models import UserModel
 from ..core.config import setting
-from ..schema.auth import CreateIUserDict, CreateUser, UserLogin
+from ..schema.auth import CreateIUserDict, CreateUser, UserLogin, Order, OrderBy, AdminCreateIUserDict, GetBySchema
 from ..exceptions.auth import PydanticException, AuthenticateEx, InvalidPasswordError,JWTEx
 
 #? hash and verify password
@@ -55,12 +56,50 @@ class UserRepositoryUtils:
     res =  await self._statement("role", role)
     return res.scalar_one_or_none()
 
+  async def _commit_refresh(self, row):
+    await self.db.commit()
+    await self.db.refresh(row)
+    return row
+
+  async def delete_row(self, row):
+    await self.db.delete(row)
+    await self.db.commit()
+  async def get_all(self, order: Order, order_by: OrderBy, filters: GetBySchema):
+    order_column = getattr(self.model, order_by )
+
+    if order == "desc":
+      order_column = desc(order_column)
+    else:
+      order_column = asc(order_column)
+
+    statement: Select = select(self.model)
+
+    # Dynamically apply filters
+    for field_name, value in filters.model_dump(exclude_none=True).items():
+      if hasattr(self.model, field_name):
+        statement = statement.where(getattr(self.model, field_name) == value)
+
+    # Apply ordering
+    statement = statement.order_by(order_column)
+
+    result = await self.db.execute(statement)
+    return result.scalars().all()
+
+
   async def create(self, kwargs):
     new_user = self.model(**kwargs)
     self.db.add(new_user)
     await self.db.commit()
     await self.db.refresh(new_user)
     return new_user
+
+  async def update_row(self, req_data:dict, row_model: UserModel) -> UserModel:
+    for key, value in req_data.items():
+      if key == "stock":
+        setattr(row_model,key,value)
+      if value:
+        setattr(row_model,key,value)
+    return await self._commit_refresh(row_model)
 
 
 #? create token
@@ -95,9 +134,8 @@ def jwt_decode(token: str, options: dict | None = None):
 
 
 #! register utils
-async def unique_validation(db: AsyncSession,email: EmailStr, username: str) -> List[dict]:
+async def unique_validation(user_repo: UserRepositoryUtils,email: EmailStr, username: str) -> List[dict]:
   """* a private methods that are used to validate the uniqueness of the email and username """
-  user_repo = UserRepositoryUtils(db)
   errors = []
   if existing_username :=  await user_repo.get_by_username(username):
     errors.append(error_schema("username", existing_username.username))
@@ -105,17 +143,18 @@ async def unique_validation(db: AsyncSession,email: EmailStr, username: str) -> 
     errors.append(error_schema("email", existing_email.email))
   return errors
 
-async def validate_user_data(db: AsyncSession,user: CreateIUserDict) -> CreateUser:
+async def validate_user_data(user_repo: UserRepositoryUtils,user: AdminCreateIUserDict) -> CreateUser:
   errors = []
   result = None
   try:
-    user_data = CreateUser(**user.model_dump())
+
+    user_data = CreateUser(**user.model_dump(exclude={'role'}))
   except ValidationError as pe:
     errors.extend(pe.errors())
   else:
     result = user_data
 
-  if unique_errors := await unique_validation(db, user.email, user.username):
+  if unique_errors := await unique_validation(user_repo, user.email, user.username):
     errors.extend(unique_errors)
 
   if errors:

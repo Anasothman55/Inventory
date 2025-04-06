@@ -19,7 +19,8 @@ from ..services.categories import (
 
 
 alter_role = [RoleBase.ADMIN, RoleBase.STOCK_KIPPER]
-
+alter_role_des = f"""this route can use by all {RoleBase.ADMIN} and {RoleBase.STOCK_KIPPER} users"""
+admin_des = f"""this route can use by all {RoleBase.ADMIN} users"""
 
 route = APIRouter(
   dependencies= [Depends(get_current_user)],
@@ -33,16 +34,19 @@ async def get_all_categories(
     order_by: Annotated[OrderBy, Query()] = OrderBy.CREATED_AT,
     order: Annotated[Order, Query()] = Order.ASC,
 ):
+  f"""this route can use by all users"""
   res = await repo.get_all(order,order_by)
   return res
 
 
-@route.post("/", status_code=status.HTTP_201_CREATED)
+@route.post("/", status_code=status.HTTP_201_CREATED, description=alter_role_des)
 async def create_category(
     req_data: Annotated[BaseCategoriesSchema, Form()],
     current_user: Annotated[UserModel, Depends(require_roles(alter_role))],
     repo: Annotated[CategoryRepository, Depends(get_category_repo)],
 ):
+
+
   result = await create_category_services(current_user.uid,repo,req_data)
   return result
 
@@ -56,7 +60,7 @@ async def get_one_categories(
   return result
 
 
-@route.patch("/{uid}", status_code=status.HTTP_200_OK)
+@route.patch("/{uid}", status_code=status.HTTP_200_OK, description=admin_des )
 async def update_category(
     current_user: Annotated[UserModel, Depends(require_roles([RoleBase.ADMIN]))],
     uid: Annotated[uuid.UUID,Path(...)],
@@ -66,7 +70,7 @@ async def update_category(
   result = await update_category_services(repo, uid, new_data)
   return result
 
-@route.delete("/{uid}", status_code=status.HTTP_204_NO_CONTENT)
+@route.delete("/{uid}", status_code=status.HTTP_204_NO_CONTENT, description=admin_des)
 async def delete_category(
     current_user: Annotated[UserModel, Depends(require_roles([RoleBase.ADMIN]))],
     uid: Annotated[uuid.UUID, Path(...)],

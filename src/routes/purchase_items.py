@@ -31,6 +31,10 @@ from ..utils.items import ItemsRepository, get_items_repo
 alter_role = [RoleBase.ADMIN, RoleBase.ACCOUNTANT]
 see_role = [RoleBase.ADMIN, RoleBase.ACCOUNTANT, RoleBase.MANAGER]
 
+alter_role_des = f"""this route can use by all {RoleBase.ADMIN} and { RoleBase.ACCOUNTANT} users"""
+see_role_des = f"""this route can use by all {RoleBase.ADMIN} and {RoleBase.ACCOUNTANT} and {RoleBase.MANAGER} users"""
+admin_des = f"""this route can use by all {RoleBase.ADMIN} users"""
+
 
 
 route = APIRouter(
@@ -39,7 +43,7 @@ route = APIRouter(
 )
 
 
-@route.get('/', status_code= status.HTTP_200_OK, response_model=List[GetAllPurchaseItemsSchema])
+@route.get('/',description=see_role_des, status_code= status.HTTP_200_OK, response_model=List[GetAllPurchaseItemsSchema])
 async def get_all_purchase_items(
   repo : Annotated[PurchasesItemsRepository , Depends(get_purchases_items_repo)],
   order_by: Annotated[OrderBy, Query()] = OrderBy.CREATED_AT,
@@ -49,7 +53,7 @@ async def get_all_purchase_items(
   return res
 
 
-@route.post("/{purchase_uid}", status_code=status.HTTP_201_CREATED)
+@route.post("/{purchase_uid}",description=alter_role_des, status_code=status.HTTP_201_CREATED)
 async def create_purchase_items(
     purchase_uid: Annotated[uuid.UUID, Path()],
     req_data: Annotated[CreatePurchaseItemsSchema , Form()],
@@ -60,14 +64,14 @@ async def create_purchase_items(
   res = await create_purchase_items_service(repo, items_repo, req_data, current_user.uid, purchase_uid)
   return res
 
-@route.get('/{uid}',  status_code= status.HTTP_200_OK, response_model=GetAllPurchaseItemsSchema)
+@route.get('/{uid}',description=see_role_des, status_code= status.HTTP_200_OK, response_model=GetAllPurchaseItemsSchema)
 async def get_one_purchase_items(
     uid: Annotated[uuid.UUID, Path()],
     repo: Annotated[PurchasesItemsRepository , Depends(get_purchases_items_repo)],):
   res = await get_one_purchase_items_services(repo, uid)
   return res
 
-@route.patch("/{uid}", status_code=status.HTTP_200_OK, response_model=BasePurchaseItemSchema)
+@route.patch("/{uid}",description=alter_role_des , status_code=status.HTTP_200_OK, response_model=BasePurchaseItemSchema)
 async def update_purchase_items(
     uid: Annotated[uuid.UUID, Path()],
     new_data: Annotated[UpdatePurchaseItemsSchema , Form()],
@@ -78,7 +82,7 @@ async def update_purchase_items(
   res = await update_purchase_items_services(repo,items_repo, uid, current_user.uid,new_data)
   return res
 
-@route.delete("/{uid}", status_code=status.HTTP_204_NO_CONTENT)
+@route.delete("/{uid}",description=alter_role_des, status_code=status.HTTP_204_NO_CONTENT)
 async def delete_purchase_items(
     current_user: Annotated[UserModel , Depends(require_roles(alter_role))],
     uid: Annotated[uuid.UUID, Path()],

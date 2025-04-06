@@ -37,6 +37,9 @@ route = APIRouter(
 
 alter_role = [RoleBase.ADMIN, RoleBase.STOCK_KIPPER]
 
+alter_role_des = f"""this route can use by all {RoleBase.ADMIN} and {RoleBase.STOCK_KIPPER} users"""
+admin_des = f"""this route can use by all {RoleBase.ADMIN} users"""
+
 
 @route.get('/basic', status_code= status.HTTP_200_OK, response_model=List[ItemsBasicSchema])
 async def get_all_items(repo: Annotated[ItemsRepository, Depends(get_items_repo)]):
@@ -56,7 +59,7 @@ async def get_all_items(
   return res
 
 
-@route.post("/", status_code=status.HTTP_201_CREATED, response_model=ItemFullSchema)
+@route.post("/", status_code=status.HTTP_201_CREATED, response_model=ItemFullSchema, description=alter_role_des)
 async def create_items(
     req_data: Annotated[CreateItemSchema, Form()],
     current_user: Annotated[UserModel, Depends(require_roles(alter_role))],
@@ -74,7 +77,7 @@ async def get_one_items(
   res = await get_one_items_services(repo,uid)
   return res
 
-@route.patch("/{uid}", status_code=status.HTTP_200_OK, response_model=ItemsBaseSchema)
+@route.patch("/{uid}", status_code=status.HTTP_200_OK, response_model=ItemsBaseSchema, description=alter_role_des)
 async def update_items(
     current_user: Annotated[UserModel, Depends(require_roles(alter_role))],
     uid: Annotated[uuid.UUID, Path()],
@@ -84,7 +87,7 @@ async def update_items(
   res = await update_items_services(repo,uid,new_data)
   return res
 
-@route.delete("/{uid}", status_code=status.HTTP_204_NO_CONTENT)
+@route.delete("/{uid}", status_code=status.HTTP_204_NO_CONTENT, description=admin_des)
 async def delete_items(
     current_user: Annotated[UserModel, Depends(require_roles([RoleBase.ADMIN]))],
     uid: Annotated[uuid.UUID, Path()],

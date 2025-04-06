@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..dependencies.auth import get_current_user
 from ..db.models import UserModel
-from ..schema.auth import CreateIUserDict, UserLogin
+from ..schema.auth import CreateIUserDict, UserLogin, RoleBase,AdminCreateIUserDict
 from ..utils.auth import (
   hash_password_utils,
   UserRepositoryUtils,
@@ -23,12 +23,16 @@ from ..utils.auth import (
 
 #? user sign up function
 
-async def register_crud(db: AsyncSession, user_model: CreateIUserDict,user_repo: UserRepositoryUtils) -> dict:
-  user = await validate_user_data(db,user_model)
+async def register_crud(
+    user_model: AdminCreateIUserDict,user_repo: UserRepositoryUtils) -> UserModel:
+
+  user = await validate_user_data(user_repo,user_model)
 
   hashing = hash_password_utils(user.password)
   user_data = user.model_dump()
   user_data['password'] = hashing
+  if user_model.role:
+    user_data['role'] = user_model.role
 
   user = await user_repo.create(user_data)
   return user

@@ -46,7 +46,23 @@ class AuthorizationError(UserError):
       }
     )
 
+class DeleteAdminError(UserError):
+  def __init__(self):
+    super().__init__(
+      status_code=status.HTTP_403_FORBIDDEN,
+      detail={
+        "error": "you can not delete an admin"
+      }
+    )
 
+class AlterAdminError(UserError):
+  def __init__(self):
+    super().__init__(
+      status_code=status.HTTP_403_FORBIDDEN,
+      detail={
+        "error": "you can not alter an admin"
+      }
+    )
 
 class JWTEx(HTTPException):
   def __init__(self, detail="JWT authentication error", status_code=status.HTTP_403_FORBIDDEN):

@@ -3,7 +3,7 @@
 import uvicorn
 
 if __name__ == "__main__":
-  uvicorn.run("src.main:app", port=8002,log_level="debug", reload=True)
+  uvicorn.run("src.main:app", port=8001,log_level="debug", reload=True)
 
 
 """

@@ -22,8 +22,8 @@ route = APIRouter(tags=["auth"])
 @route.post("/signup", status_code= status.HTTP_201_CREATED)
 async def signup_route(
     user_model: Annotated[CreateIUserDict, Form()],
-    db: Annotated[AsyncSession, Depends(get_db)], user_repo: Annotated[UserRepositoryUtils,  Depends(get_user_repo)],):
-  result = await register_crud(db, user_model, user_repo)
+    user_repo: Annotated[UserRepositoryUtils,  Depends(get_user_repo)],):
+  result = await register_crud(user_model,user_repo)
 
   return result
 

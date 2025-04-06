@@ -8,6 +8,16 @@ from enum import Enum, StrEnum
 from typing import List,Optional
 
 
+class Order(StrEnum):
+  DESC  = "desc"
+  ASC  = "asc"
+
+class OrderBy(StrEnum):
+  USERNAME='username'
+  ROLE='role'
+  LAST_LOGIN_DATE='last_login_date'
+  CREATED_AT = "created_at"
+  UPDATED_AT = "updated_at"
 
 class RoleBase(StrEnum):
   USER = "user"
@@ -42,6 +52,20 @@ class CreateIUserDict(BaseModel):
 
   model_config = ConfigDict(str_strip_whitespace=True,)
 
+class AdminCreateIUserDict(BaseModel):
+  username: str | None = None
+  email: str | None = None
+  password: str | None = None
+  role: Optional[RoleBase] = None
+
+  @field_validator("role", mode="before")
+  @classmethod
+  def empty_string_to_none(cls, v):
+    if v == "":
+      return None
+    return v
+
+  model_config = ConfigDict(str_strip_whitespace=True,)
 
 class CreateUser(UserBase):
   password: str = Field(min_length=8, max_length=128)
@@ -56,7 +80,6 @@ class UserLogin(BaseModel):
   @field_validator("email")
   @classmethod
   def validate_email(cls, value):
-
     if not value.strip():
       raise ValueError("Email are required")
     try:
@@ -77,9 +100,15 @@ class UserLogin(BaseModel):
     str_strip_whitespace=True
   )
 
+class UpdateUserSchema(AdminCreateIUserDict):
+  pass
 
 
 
+class GetBySchema(BaseModel):
+  username: str | None = None
+  email: str | None = None
+  role: RoleBase | None = None
 
 
 
