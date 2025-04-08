@@ -9,7 +9,7 @@ from ..schema.items import (
   ItemsBaseSchema,
   ItemFullSchema,
   CreateItemSchema,
-  ItemsPurchaseSchema,
+  GetItemFullJoin,
   ItemsBasicSchema,
   OrderBy,
   Order,
@@ -49,7 +49,7 @@ async def get_all_items(repo: Annotated[ItemsRepository, Depends(get_items_repo)
   return res
 
 
-@route.get('/', status_code= status.HTTP_200_OK, response_model=List[ItemsPurchaseSchema])
+@route.get('/', status_code= status.HTTP_200_OK, response_model=List[ItemFullSchema])
 async def get_all_items(
     repo: Annotated[ItemsRepository, Depends(get_items_repo)],
     order_by: Annotated[OrderBy, Query()] = OrderBy.CREATED_AT,
@@ -69,7 +69,7 @@ async def create_items(
   return res
 
 
-@route.get('/{uid}',  status_code= status.HTTP_200_OK, response_model=ItemsPurchaseSchema)
+@route.get('/{uid}',  status_code= status.HTTP_200_OK, response_model=GetItemFullJoin)
 async def get_one_items(
     uid: Annotated[uuid.UUID, Path()],
     repo: Annotated[ItemsRepository, Depends(get_items_repo)],

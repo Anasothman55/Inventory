@@ -29,11 +29,11 @@ route = APIRouter(
 @route.get('/', response_model=List[GetFullUser], status_code= status.HTTP_200_OK)
 async def get_all_users(
     user_repo: Annotated[UserRepositoryUtils, Depends(get_user_repo)],
-    filter: Annotated[GetBySchema, Depends()],
+    filters: Annotated[GetBySchema, Depends()],
     order_by: Annotated[OrderBy, Query()] = OrderBy.CREATED_AT,
     order: Annotated[Order, Query()] = Order.ASC,
 ) :
-  res = await user_repo.get_all(order, order_by, filter)
+  res = await user_repo.get_all(order, order_by, filters)
   return res
 
 

@@ -1,11 +1,11 @@
 import  enum
 import uuid
-from typing import List
+from typing import List, Any
 from datetime import  datetime
 
 from pydantic import BaseModel, ConfigDict
 
-
+from .item_transactions import GetFullTransactions1, BaseTransactions, GetFullEmployeeWithTransactions
 
 class Order(enum.Enum):
   DESC  = "desc"
@@ -34,7 +34,15 @@ class TimeSchema(BaseModel):
     str_strip_whitespace=True
   )
 
+class  EmployeeFullSchema(BaseEmployeeSchema,TimeSchema):
+  uid: uuid.UUID
+
+
+class  EmployeeWithUseSchema(BaseEmployeeSchema,TimeSchema):
+  uid: uuid.UUID
+  item_transaction_model_em: List[GetFullEmployeeWithTransactions] = []
+
 
 class  EmployeeWithInfoSchema(BaseEmployeeSchema,TimeSchema):
   uid: uuid.UUID
-  pass
+

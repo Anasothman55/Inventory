@@ -45,8 +45,8 @@ class EmployeeRepository:
 
     statement = (
       select(self.model).options(
-        selectinload(EmployeeModel.employee_info_model),
-        selectinload(EmployeeModel.item_transaction_model)
+        selectinload(self.model.employee_info_model),
+                selectinload(self.model.item_transaction_model_em)
       ).order_by(order_column)
     )
     result = await self.db.execute(statement)

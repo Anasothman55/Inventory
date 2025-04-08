@@ -51,7 +51,10 @@ class ItemsRepository:
       order_column = asc(order_column)
 
     statement = (
-      select(self.model).options(selectinload(self.model.purchas_items_model)).order_by(order_column)
+      select(self.model).options(
+        selectinload(self.model.purchas_items_model),
+        selectinload(self.model.item_transaction_model)
+      ).order_by(order_column)
     )
     result = await self.db.execute(statement)
     return result.scalars().all()

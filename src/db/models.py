@@ -75,7 +75,7 @@ class ItemsModel(SQLModel , table= True):
   
   purchas_items_model: List["PurchaseItemsModel"] = Relationship(back_populates="items_model",sa_relationship_kwargs={"lazy": "selectin"})
   category_model: Optional[CategoryModel] = Relationship(back_populates="items_model", sa_relationship_kwargs={"lazy": "selectin"})
-  item_transaction_model : Optional["ItemTransactions"] = Relationship(back_populates="items_model", sa_relationship_kwargs={"lazy": "selectin"})
+  item_transaction_model : List["ItemTransactions"] = Relationship(back_populates="items_model", sa_relationship_kwargs={"lazy": "selectin"})
 
 
   created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
@@ -113,8 +113,6 @@ class PurchaseModel(SQLModel, table= True):
     return f"<Book {self.purchaser}>"
 
 
-
-
 class PurchaseItemsModel(SQLModel, table= True):
   __tablename__ = "purchas_items"
 
@@ -135,25 +133,31 @@ class PurchaseItemsModel(SQLModel, table= True):
   created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
   updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
 
-def __repr__(self):
-    return f"<Book {self.uid}>"
+  def __repr__(self):
+      return f"<Book {self.uid}>"
 
 
 class EmployeeModel(SQLModel, table = True):
   __tablename__ = "employees"
+
   uid: uuid.UUID = Field(sa_column=Column(pg.UUID(as_uuid=True), primary_key=True,index=True, unique=True, default=uuid.uuid4))
   name: str = Field(index=True, nullable=False, unique=True)
 
   user_uid: Optional[uuid.UUID]  = Field( foreign_key="users.uid")
 
   employee_info_model: Optional["EmployeeInfoModel"] = Relationship(back_populates="employee_model", sa_relationship_kwargs={"lazy": "selectin"})
-  item_transaction_model : Optional["ItemTransactions"] = Relationship(back_populates="employee_model", sa_relationship_kwargs={"lazy": "selectin"})
+  item_transaction_model_em : List["ItemTransactions"] = Relationship(back_populates="employee_model", sa_relationship_kwargs={"lazy": "selectin"})
 
   created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
   updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
 
+  def __repr__(self):
+    return f"<Book {self.name}>"
+
+
 class EmployeeInfoModel(SQLModel, table= True):
   __tablename__ = "employee_info"
+
   uid: uuid.UUID = Field(sa_column=Column(pg.UUID(as_uuid=True), primary_key=True,index=True, unique=True, default=uuid.uuid4))
   email: str = Field(unique=True)
   phone_number: str = Field(unique=True, index=True)
@@ -166,10 +170,13 @@ class EmployeeInfoModel(SQLModel, table= True):
   created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
   updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
 
+  def __repr__(self):
+    return f"<Book {self.uid}>"
 
 
 class ItemTransactions(SQLModel, table=True):
   __tablename__ = "item_transactions"
+
   uid: uuid.UUID = Field(sa_column=Column(pg.UUID(as_uuid=True), primary_key=True,index=True, unique=True, default=uuid.uuid4))
   quantity: int = Field(gt=0, nullable=False)
   action_type: str = Field(nullable=False, index=True)
@@ -181,12 +188,14 @@ class ItemTransactions(SQLModel, table=True):
   user_uid: Optional[uuid.UUID]  = Field( foreign_key="users.uid", ondelete='SET NULL')
   item_uid: Optional[uuid.UUID]  = Field(foreign_key="items.uid", ondelete='SET NULL')
 
-  employee_model: Optional[EmployeeModel] = Relationship(back_populates="item_transaction_model", sa_relationship_kwargs={"lazy": "selectin"})
+  employee_model: Optional[EmployeeModel] = Relationship(back_populates="item_transaction_model_em", sa_relationship_kwargs={"lazy": "selectin"})
   items_model: Optional[ItemsModel] = Relationship(back_populates="item_transaction_model", sa_relationship_kwargs={"lazy": "selectin"})
 
   created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
   updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
 
+  def __repr__(self):
+    return f"<Book {self.uid}>"
 
 
 

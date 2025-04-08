@@ -6,7 +6,7 @@ from fastapi import APIRouter, status, Depends, Path, Query, Form
 
 from ..db.models import UserModel, EmployeeModel
 from ..dependencies.auth import require_roles, get_current_user
-from ..schema.employee import BaseEmployeeSchema, Order, OrderBy,EmployeeWithInfoSchema
+from ..schema.employee import BaseEmployeeSchema, Order, OrderBy,EmployeeWithInfoSchema, EmployeeFullSchema, EmployeeWithUseSchema
 from ..schema.auth import RoleBase
 from ..utils.employee import EmployeeRepository, get_employee_repo
 from ..services.employee import (
@@ -31,7 +31,7 @@ route = APIRouter(
   tags=["Employees"]
 )
 
-@route.get('/', response_model= List[EmployeeWithInfoSchema], status_code= status.HTTP_200_OK)
+@route.get('/', response_model= List[EmployeeWithUseSchema], status_code= status.HTTP_200_OK)
 async def get_all_employee(
     repo: Annotated[EmployeeRepository, Depends(get_employee_repo)],
     order_by: Annotated[OrderBy, Query()] = OrderBy.CREATED_AT,
@@ -52,7 +52,7 @@ async def create_category(
   return result
 
 
-@route.get('/{uid}',  status_code= status.HTTP_200_OK, response_model=EmployeeWithInfoSchema)
+@route.get('/{uid}',  status_code= status.HTTP_200_OK, response_model=EmployeeWithUseSchema)
 async def get_one_categories(
     repo: Annotated[EmployeeRepository, Depends(get_employee_repo)],
     uid: Annotated[uuid.UUID, Path(...)]

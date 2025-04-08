@@ -5,9 +5,9 @@ from datetime import datetime, timezone, timedelta
 
 from passlib.context import CryptContext
 from fastapi import  Response
-from sqlalchemy import select, Select
+from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import desc, asc
+from sqlmodel import desc, asc,select
 from jose import jwt, JWTError, ExpiredSignatureError 
 from pydantic import EmailStr,ValidationError
 

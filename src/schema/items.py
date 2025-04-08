@@ -7,7 +7,7 @@ from datetime import datetime
 from pydantic import  BaseModel, ConfigDict
 
 from .purchase_items import  BasePurchaseItemSchema
-
+from .item_transactions import GetFullItemsWithTransactions
 
 class Order(enum.Enum):
   DESC  = "desc"
@@ -33,7 +33,7 @@ class ItemsBasicSchema(BaseModel):
 
 class CreateItemSchema(ItemsBaseSchema):
   description: str | None = None
-  category_uid: uuid.UUID  | None = None
+  category_uid: uuid.UUID
 
   model_config = ConfigDict(
     extra='forbid',
@@ -67,5 +67,6 @@ class ItemFullSchema(ItemsBaseSchema):
   )
 
 
-class ItemsPurchaseSchema(ItemFullSchema):
+class GetItemFullJoin(ItemFullSchema):
   purchas_items_model: List[BasePurchaseItemSchema] = []
+  item_transaction_model: List[GetFullItemsWithTransactions] = []
