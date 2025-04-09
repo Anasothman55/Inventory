@@ -4,7 +4,7 @@ from typing import List
 from datetime import datetime
 
 
-from pydantic import  BaseModel, ConfigDict
+from pydantic import  BaseModel, ConfigDict, field_validator
 
 from .purchase_items import  BasePurchaseItemSchema
 from .item_transactions import GetFullItemsWithTransactions
@@ -53,6 +53,26 @@ class UpdateItemSchema(ItemsBaseSchema):
     str_strip_whitespace=True
   )
 
+  @field_validator("minimum_stock_level", mode="before")
+  @classmethod
+  def empty_string_to_none1(cls, v):
+    if v == "" or None:
+      return None
+    return v
+
+  @field_validator("stock", mode="before")
+  @classmethod
+  def empty_string_to_none2(cls, v):
+    if v == "" or None:
+      return None
+    return v
+
+  @field_validator("unit", mode="before")
+  @classmethod
+  def empty_string_to_none3(cls, v):
+    if v == "" or None:
+      return None
+    return v
 
 class ItemFullSchema(ItemsBaseSchema):
   uid: uuid.UUID

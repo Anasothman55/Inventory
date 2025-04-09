@@ -31,12 +31,15 @@ class UpdatePurchaseItemsSchema(BaseModel):
   note: str | None = None
 
 
+class ItemsModelPT(BaseModel):
+  item_name: str
+  stock: int
 
 class GetFullPurchaseItemsSchema(BasePurchaseItemSchema):
   uid: uuid.UUID | None = None
   created_at: datetime
   updated_at: datetime
-
+  items_model: ItemsModelPT | None = None
 
 class GetAllPurchaseItemsSchema(GetFullPurchaseItemsSchema):
   user_uid : uuid.UUID  | None = None

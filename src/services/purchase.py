@@ -16,7 +16,7 @@ async def create_purchase_services(
     user_uid:uuid.UUID,
     repo: PurchasesRepository,
     req_data:CreatePurchaseSchema) -> PurchaseModel:
-  await check_purchase_unique(req_data.purchasing_plase, req_data.receipt_number)
+  await check_purchase_unique(repo,req_data.purchasing_plase, req_data.receipt_number)
 
   curuncy_type = req_data.curuncy_type.value
   new_data = req_data.model_dump(exclude={'curuncy_type'})

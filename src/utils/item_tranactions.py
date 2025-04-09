@@ -1,9 +1,11 @@
 from fastapi import Depends
 from sqlalchemy import Select
 
+from .items import ItemsRepository
 from ..db.index import get_db
 from ..db.models import ItemsModel, ItemTransactions
-from ..schema.item_transactions import Order, OrderBy, GetBySchema
+from ..schema.item_transactions import Order, OrderBy, GetBySchema, ActionType
+from ..exceptions.item_transactions import TransactionsStock
 
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -82,14 +84,34 @@ async def get_items_transactions_repo(db: Annotated[AsyncSession, Depends(get_db
   return ItemTransactionsRepository(db)
 
 
-
-async def create_new_row_utils(
-    data: dict, create_row: Callable, update_row: Callable, items: ItemsModel):
-  new_row = ItemTransactions(**data)
-  new_data = await create_row(new_row)
-  new_stock = new_data.quantity + items.stock
-
-
-  return new_data
+async def update_items_by_transactions(
+    items_repo: ItemsRepository,
+    items: ItemsModel,
+    qty: int
+):
+  item_update_dict = {"stock": qty}
+  await items_repo.update_row(item_update_dict, items)
 
 
+def update_transactions_utils(
+    stock: int,
+    abc_qty: int,
+    new_qty: int,
+    old_qty: int,
+    actions: str
+):
+
+  if actions == ActionType.USE:
+    if new_qty > stock + old_qty:
+      raise TransactionsStock
+    if old_qty > new_qty:
+      stock += abc_qty
+    else:
+      stock -= abc_qty
+  else:
+    if old_qty > new_qty:
+      stock -= abc_qty
+    else:
+      stock += abc_qty
+
+  return stock

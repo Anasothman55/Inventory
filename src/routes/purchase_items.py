@@ -53,7 +53,7 @@ async def get_all_purchase_items(
   return res
 
 
-@route.post("/{purchase_uid}",description=alter_role_des, status_code=status.HTTP_201_CREATED)
+@route.post("/{purchase_uid}", description=alter_role_des, status_code=status.HTTP_201_CREATED)
 async def create_purchase_items(
     purchase_uid: Annotated[uuid.UUID, Path()],
     req_data: Annotated[CreatePurchaseItemsSchema , Form()],

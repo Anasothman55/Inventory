@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from pydantic import  BaseModel,ConfigDict, Field
 
-from .purchase_items import  BasePurchaseItemSchema
+from .purchase_items import  BasePurchaseItemSchema, GetFullPurchaseItemsSchema
 
 class Curuncy(enum.Enum):
   USD  = "USD"
@@ -76,7 +76,8 @@ class GetFullPurchaseSchema(BasePurchaseSchema2):
 
 
 class GetPurchaseItemsSchema(GetFullPurchaseSchema):
-  purchas_items_model : List[BasePurchaseItemSchema]
+  purchas_items_model : List[GetFullPurchaseItemsSchema]
+
 
 
 

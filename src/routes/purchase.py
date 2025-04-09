@@ -40,7 +40,7 @@ route = APIRouter(
 )
 
 
-@route.get('/',description=see_role_des, status_code= status.HTTP_200_OK, response_model=List[GetPurchaseItemsSchema])
+@route.get('/',description=see_role_des, status_code= status.HTTP_200_OK, response_model=List[GetFullPurchaseSchema])
 async def get_all_items(
     repo: Annotated[PurchasesRepository, Depends(get_purchases_repo)],
     order_by: Annotated[OrderBy, Query()] = OrderBy.CREATED_AT,

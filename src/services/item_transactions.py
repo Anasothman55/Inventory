@@ -1,11 +1,13 @@
 import uuid
 
 from ..schema.item_transactions import ActionType
-from ..utils.item_tranactions import ItemTransactionsRepository
+from ..utils.item_tranactions import ItemTransactionsRepository,update_items_by_transactions,update_transactions_utils
 from ..utils.items import ItemsRepository
 from ..schema.item_transactions import CreateTransactions, UpdateTransactions
 from ..services.items import get_one_items_services
 from ..db.models import ItemTransactions
+from ..exceptions.item_transactions import TransactionsNotFound, TransactionsStock
+
 
 async def   create_item_transactions_sservice(
     user_uid: uuid.UUID,
@@ -16,18 +18,16 @@ async def   create_item_transactions_sservice(
 ):
 
   items = await get_one_items_services(items_repo, item_uid)
+  new_qty = items.stock
 
   if req_data.action_type == ActionType.USE:
     if req_data.quantity > items.stock:
-      raise
-    used = items.stock - req_data.quantity
-    item_update_dict = {"stock": used}
-    await items_repo.update_row(item_update_dict, items)
+      raise TransactionsStock
+    new_qty -=  req_data.quantity
   else:
-    returned = items.stock + req_data.quantity
-    item_update_dict = {"stock": returned}
-    await items_repo.update_row(item_update_dict, items)
+    new_qty += req_data.quantity
 
+  await update_items_by_transactions(items_repo,items,new_qty)
   new_row = ItemTransactions(**req_data.model_dump(), user_uid=user_uid, item_uid=items.uid)
   res = await repo.create_row(new_row)
 
@@ -41,7 +41,7 @@ async def get_one_transaction_service(
 )-> ItemTransactions:
   res = await repo.get_by_uid(uid)
   if not res:
-    raise "Transaction not found"
+    raise TransactionsNotFound(uid)
   return res
 
 
@@ -56,26 +56,11 @@ async def update_item_transactions_sservice(
   transaction = await get_one_transaction_service(repo, uid)
   items = await get_one_items_services(items_repo, transaction.item_uid)
 
-  new_qty = abs(transaction.quantity - new_data.quantity)
+  abc_qty = abs(transaction.quantity - new_data.quantity)
 
-  if transaction.action_type == ActionType.USE:
-    if new_qty > items.stock:
-      raise "use must be smaller than stock item"
+  stock =  update_transactions_utils(items.stock, abc_qty,new_data.quantity ,transaction.quantity, transaction.action_type)
 
-    if transaction.quantity > new_data.quantity:
-      used =  items.stock + new_qty
-    else:
-      used =  items.stock - new_qty
-    item_update_dict = {"stock": used}
-    await items_repo.update_row(item_update_dict, items)
-  else:
-    if transaction.quantity > new_data.quantity:
-      returned =  items.stock - new_qty
-    else:
-      returned =  items.stock + new_qty
-    item_update_dict = {"stock": returned}
-    await items_repo.update_row(item_update_dict, items)
-
+  await update_items_by_transactions(items_repo,items,stock)
   result = await repo.update_row(new_data.model_dump(), transaction)
   return result
 
@@ -88,16 +73,14 @@ async def delete_transactions_services(
 ):
   transaction = await get_one_transaction_service(repo, uid)
   items = await get_one_items_services(items_repo, transaction.item_uid)
+  new_qty = items.stock
 
   if transaction.action_type == ActionType.USE:
-    used = items.stock + transaction.quantity
-    item_update_dict = {"stock": used}
-    await items_repo.update_row(item_update_dict, items)
+    new_qty += transaction.quantity
   else:
-    returned = items.stock - transaction.quantity
-    item_update_dict = {"stock": returned}
-    await items_repo.update_row(item_update_dict, items)
+    new_qty -= transaction.quantity
 
+  await update_items_by_transactions(items_repo,items,new_qty)
   await repo.delete_row(transaction)
 
 
