@@ -12,6 +12,7 @@ dependencies = [
       "fastapi-mail>=1.4.2",
       "fastapi[all]>=0.115.8",
       "greenlet[cryptography]>=3.1.1",
+      "httpx>=0.28.1",
       "itsdangerous[cryptography]>=2.2.0",
       "jinja2>=3.1.5",
       "passlib[cryptography]>=1.7.4",
@@ -22,5 +23,6 @@ dependencies = [
       "slowapi>=0.1.9",
       "sqlalchemy[all]>=2.0.37",
       "sqlmodel[all]>=0.0.22",
+      "streamlit>=1.44.1",
       "uvicorn[all]>=0.34.0",
 ]

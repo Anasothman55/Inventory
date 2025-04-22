@@ -19,20 +19,28 @@ class UserNotFoundError(UserError):
       status_code=status.HTTP_404_NOT_FOUND,
       detail= {
         "error": message
+        
       }
     )
 
 
-class AuthenticateEx(UserNotFoundError):
-  pass
-
+class AuthenticateEx(UserError):
+  def __init__(self):
+    super().__init__(
+      status_code=status.HTTP_404_NOT_FOUND,
+      detail= {
+        "error": "Invalide Email address"
+        
+      }
+    )
 
 class InvalidPasswordError(UserError):
   def __init__(self):
     super().__init__(
       status_code=status.HTTP_401_UNAUTHORIZED,
       detail={
-        "error": "Invalid password"
+        "error": "Invalid password",
+        "loc": "email"
       }
     )
 

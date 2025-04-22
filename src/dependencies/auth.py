@@ -4,6 +4,7 @@ from ..db.index import get_db
 from ..exceptions.auth import UserNotFoundError, AuthorizationError
 from ..schema.auth import RoleBase
 
+from rich import print
 
 from fastapi import Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +17,6 @@ async def get_user_repo(db: Annotated[AsyncSession, Depends(get_db)]):
 
 
 async def get_access_token(request: Request):
-  
   if not (access_token := request.cookies.get("access_token")):
     raise HTTPException(
       status_code=status.HTTP_401_UNAUTHORIZED,

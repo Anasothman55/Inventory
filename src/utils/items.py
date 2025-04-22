@@ -2,12 +2,12 @@ from fastapi import Depends
 
 from ..db.index import get_db
 from ..db.models import ItemsModel
-from ..schema.items import Order, OrderBy
+from ..schema.items import ItemFullSchema, Order, OrderBy
 
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select,desc, asc
-from typing import Any, Annotated
+from typing import Any, Annotated, List
 import uuid
 
 class ItemsRepository:
@@ -42,7 +42,7 @@ class ItemsRepository:
     return await self._statement(field="category_uid", value= uid)
 
 
-  async def get_all(self, order: Order, order_by: OrderBy):
+  async def get_all(self, order: Order, order_by: OrderBy)->List[ItemFullSchema]:
     order_column = getattr(self.model, order_by.value )
 
     if order.value == "desc":

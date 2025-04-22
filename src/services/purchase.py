@@ -40,12 +40,12 @@ async def update_purchase_services(
     repo: PurchasesRepository,
     uid: uuid.UUID,
     new_data: UpdatePurchaseSchema) -> PurchaseModel:
-  item = await get_one_purchase_services(repo,uid)
-  result = await repo.update_row(new_data.model_dump(), item)
+  purchase = await get_one_purchase_services(repo,uid)
+  result = await repo.update_row(new_data.model_dump(), purchase)
   return result
 
 
 async def delete_purchase_services(repo: PurchasesRepository, uid: uuid.UUID) -> None:
-  item = await get_one_purchase_services(repo,uid)
-  await repo.delete_row(item)
+  purchase = await get_one_purchase_services(repo,uid)
+  await repo.delete_row(purchase)
   return None

@@ -42,10 +42,13 @@ async def get_one_category_services(repo: CategoryRepository, uid: uuid.UUID) ->
 async def update_category_services(
     repo: CategoryRepository,
     uid: uuid.UUID, req_data: BaseCategoriesSchema) -> CategoryModel:
-  category = await get_one_category_services(repo,uid)
-  result = await repo.update_row(req_data.model_dump(), category)
-  return result
-
+  
+  try:
+    category = await get_one_category_services(repo,uid)
+    result = await repo.update_row(req_data.model_dump(), category)
+    return result
+  except IntegrityError as e:
+    raise CategoriesAlreadyExists(req_data.name)
 
 async def delete_category_services(repo: CategoryRepository, uid: uuid.UUID) -> None:
   category = await get_one_category_services(repo,uid)

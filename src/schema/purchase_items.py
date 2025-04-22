@@ -13,6 +13,12 @@ class BasePurchaseItemSchema(BaseModel):
   unite_price: Decimal
   subtotal_price : Decimal
   note: str
+  
+
+class BasePurchaseItemSchema2(BasePurchaseItemSchema):
+  purchas_uid : uuid.UUID | None = None
+
+  
 
 class CreatePurchaseItemsSchema(BaseModel):
   item_uid : str | None = None

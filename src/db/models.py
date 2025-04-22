@@ -30,6 +30,10 @@ class UserModel(SQLModel, table= True):
   is_active: bool = Field(default=True)
   password: str = Field(exclude=True, nullable=True)
   last_login_date: datetime = Field(sa_column=Column( DateTime(timezone=True), nullable=True ))
+  
+  
+  category_model: Optional["CategoryModel"] = Relationship(back_populates="user_model", sa_relationship_kwargs={"lazy": "selectin"})
+
 
   created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
   updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
@@ -49,7 +53,7 @@ class CategoryModel(SQLModel, table = True):
   user_uid: Optional[uuid.UUID] = Field( foreign_key="users.uid")
 
   items_model: List["ItemsModel"] = Relationship(back_populates="category_model",sa_relationship_kwargs={"lazy": "selectin"})
-
+  user_model: Optional[UserModel] = Relationship(back_populates="category_model", sa_relationship_kwargs={"lazy": "selectin"})
   created_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True)))
   updated_at: datetime = Field(default_factory=get_current_time,sa_column=Column(TIMESTAMP(timezone=True),onupdate=get_current_time))
 

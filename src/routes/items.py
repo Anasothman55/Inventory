@@ -46,6 +46,7 @@ async def get_all_items(repo: Annotated[ItemsRepository, Depends(get_items_repo)
   order = Order.ASC
   order_by = OrderBy.NAME
   res = await repo.get_all(order,order_by)
+  
   return res
 
 

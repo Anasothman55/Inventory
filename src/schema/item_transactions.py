@@ -32,6 +32,10 @@ def get_time()-> time:
 class EmployeeName(BaseModel):
   name: str
 
+class EmployeeNameWithUid(BaseModel):
+  uid: uuid.UUID
+  name: str
+
 class ItemName(BaseModel):
   item_name: str
 
@@ -101,7 +105,7 @@ class GetFullEmployeeWithTransactions(GetFullTransactions1):
   items_model: ItemName
 
 class GetFullItemsWithTransactions(GetFullTransactions1):
-  employee_model: EmployeeName
+  employee_model: EmployeeNameWithUid
 
 
 class GetBySchema(BaseModel):

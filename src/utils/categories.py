@@ -16,7 +16,9 @@ class CategoryRepository:
     self.model = CategoryModel
 
   async def _statement(self, field: str, value: Any):
-    statement = select(self.model).where(getattr(self.model, field) == value)
+    statement = select(self.model).options(
+      selectinload(CategoryModel.items_model)
+    ).where(getattr(self.model, field) == value)
     result = await self.db.execute(statement)
     return result.scalars().first()
 
@@ -44,7 +46,7 @@ class CategoryRepository:
       order_column = asc(order_column)
 
     statement = (
-      select(self.model).options(selectinload(CategoryModel.items_model)).order_by(order_column)
+      select(self.model).options(selectinload(self.model.user_model)).order_by(order_column)
     )
     result = await self.db.execute(statement)
     return result.scalars().all()

@@ -9,7 +9,7 @@ from ..utils.categories import CategoryRepository,get_category_repo
 from ..db.models import UserModel
 from ..dependencies.auth import get_current_user,require_roles
 from ..schema.auth import RoleBase
-from ..schema.categories import  Order, CategoriesItemSchema,BaseCategoriesSchema,OrderBy
+from ..schema.categories import  Order, CategoriesItemSchema,BaseCategoriesSchema,OrderBy, CategoriesItemMainSchema
 from ..services.categories import (
   create_category_services,
   get_one_category_services,
@@ -28,7 +28,7 @@ route = APIRouter(
 )
 
 
-@route.get('/', response_model= List[CategoriesItemSchema], status_code= status.HTTP_200_OK)
+@route.get('/', response_model= List[CategoriesItemMainSchema], status_code= status.HTTP_200_OK)
 async def get_all_categories(
     repo: Annotated[CategoryRepository, Depends(get_category_repo)],
     order_by: Annotated[OrderBy, Query()] = OrderBy.CREATED_AT,
